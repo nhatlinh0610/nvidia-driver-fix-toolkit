@@ -21,6 +21,7 @@ Autonomy policy:
 7. Do not disable Wi-Fi or network adapters unless the user explicitly asks.
 8. Do not use unsafe automatic startup loops. Use the toolkit's explicit step actions and resume yourself after reboot.
 9. If you create useful changes, fixes, docs, prompts, sanitized reports, or reusable scripts, commit and push them to the GitHub repository whenever authentication is already available or can be safely requested.
+10. Do not get blocked just because Git is not installed. Use the ZIP download workflow for running the toolkit, and use the no-Git publishing fallback if needed.
 
 Hard safety stops:
 Stop and explain instead of repairing if:
@@ -37,13 +38,28 @@ Create the working directory:
 
 New-Item -ItemType Directory -Path C:\NvidiaFix -Force | Out-Null
 
-Clone or download the toolkit:
+Clone or download the toolkit.
+
+If Git is available:
 
 git clone https://github.com/nhatlinh0610/nvidia-driver-fix-toolkit.git C:\NvidiaFix\nvidia-driver-fix-toolkit
 cd C:\NvidiaFix\nvidia-driver-fix-toolkit
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
-If git is unavailable, download the repository ZIP from GitHub, extract it to C:\NvidiaFix\nvidia-driver-fix-toolkit, and continue.
+If Git is not available, download and extract the repository ZIP instead:
+
+$zipPath = "C:\NvidiaFix\nvidia-driver-fix-toolkit.zip"
+$extractPath = "C:\NvidiaFix\repo_zip"
+$targetPath = "C:\NvidiaFix\nvidia-driver-fix-toolkit"
+Invoke-WebRequest -Uri "https://github.com/nhatlinh0610/nvidia-driver-fix-toolkit/archive/refs/heads/main.zip" -OutFile $zipPath
+Remove-Item -LiteralPath $extractPath -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath $targetPath -Recurse -Force -ErrorAction SilentlyContinue
+Expand-Archive -LiteralPath $zipPath -DestinationPath $extractPath -Force
+Move-Item -LiteralPath (Join-Path $extractPath "nvidia-driver-fix-toolkit-main") -Destination $targetPath
+cd $targetPath
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+Do not install Git just to run the toolkit. Git is only needed for direct git commit/push publishing.
 
 Phase 1 - Preflight:
 Run:
@@ -187,6 +203,9 @@ Push back anything reusable or helpful that you were able to create or improve.
 Repository:
 https://github.com/nhatlinh0610/nvidia-driver-fix-toolkit
 
+Publishing requirement:
+Direct publishing to GitHub requires a GitHub account, token, or browser session with write access to the repository. Reading and downloading the public repository does not require an account. If write access is not available, do not block the repair workflow; leave a sanitized patch or ZIP bundle for the user to publish later.
+
 What to publish:
 - Script fixes and improvements.
 - Documentation updates.
@@ -210,7 +229,7 @@ git diff -- . ":(exclude)*.zip" ":(exclude)*.exe" ":(exclude)*.dmp"
 
 Review the diff for secrets and private data. Redact machine-specific details from reports before adding them.
 
-Commit and push:
+If Git is installed and the working directory is a git clone, commit and push:
 
 git pull --ff-only
 git add README.md ANTIGRAVITY_PROMPT.md *.ps1
@@ -225,12 +244,21 @@ If direct push to main is rejected, create a branch and push it:
 git checkout -b antigravity-update-YYYYMMDD-HHMMSS
 git push -u origin antigravity-update-YYYYMMDD-HHMMSS
 
-If authentication is missing, ask only for the minimum GitHub authentication needed to push. If the user does not provide it, write a local patch and clear instructions:
+If Git is not installed or the toolkit was downloaded as a ZIP:
+- Do not stop the diagnostics or repair work.
+- Put all sanitized publishable files under C:\NvidiaFix\Publish.
+- Create a ZIP bundle:
+  Compress-Archive -Path C:\NvidiaFix\Publish\* -DestinationPath C:\NvidiaFix\github-update.zip -Force
+- If there are edits inside the toolkit folder but no git metadata, write a simple change summary to C:\NvidiaFix\github-update-summary.md and include the changed files in C:\NvidiaFix\Publish.
+- If GitHub authentication and a safe API/file-upload path are already available, publish the sanitized files through GitHub without storing tokens.
+- If direct publishing is not available, ask only for the minimum GitHub authentication or permission needed to install Git from the official Git for Windows source. If the user does not provide it, leave the bundle and instructions in the final report.
+
+If Git is installed but authentication is missing, ask only for the minimum GitHub authentication needed to push. If the user does not provide it, write a local patch and clear instructions:
 
 git diff > C:\NvidiaFix\github-update.patch
 git status --short
 
-Then include the patch path and exact push commands in the final report.
+Then include the patch path or ZIP bundle path and exact push/upload commands in the final report.
 
 Emergency recovery:
 If Windows keeps booting into Safe Mode, run:
