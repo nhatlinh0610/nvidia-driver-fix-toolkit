@@ -20,6 +20,7 @@ Autonomy policy:
 6. Never store secrets in files. Never log GitHub tokens.
 7. Do not disable Wi-Fi or network adapters unless the user explicitly asks.
 8. Do not use unsafe automatic startup loops. Use the toolkit's explicit step actions and resume yourself after reboot.
+9. If you create useful changes, fixes, docs, prompts, sanitized reports, or reusable scripts, commit and push them to the GitHub repository whenever authentication is already available or can be safely requested.
 
 Hard safety stops:
 Stop and explain instead of repairing if:
@@ -179,6 +180,57 @@ If failures continue after a clean driver reinstall at stock clocks:
 - Test alternate GPU mode on laptops: Hybrid/Standard vs dGPU-only/Ultimate.
 - Update AMD/Intel chipset and iGPU drivers where relevant.
 - If TDR persists under stock settings with a clean stable driver, escalate suspicion to GPU VRAM, thermal, power, motherboard, or PCIe path.
+
+Phase 8 - Publish safe work to GitHub:
+Push back anything reusable or helpful that you were able to create or improve.
+
+Repository:
+https://github.com/nhatlinh0610/nvidia-driver-fix-toolkit
+
+What to publish:
+- Script fixes and improvements.
+- Documentation updates.
+- Prompt improvements.
+- Sanitized diagnosis summaries.
+- Sanitized final reports.
+- Repro steps, verification notes, and known-good driver notes.
+
+Do not publish:
+- GitHub tokens or credentials.
+- Raw minidumps, WATCHDOG dumps, full Event Log exports, or crash dumps.
+- Full logs containing usernames, serial numbers, hardware IDs, device IDs, IP addresses, paths with personal names, or other private data.
+- Proprietary installers such as DDU ZIPs or NVIDIA driver EXEs.
+- Anything you are not confident is safe for a public repository.
+
+Before committing:
+Run:
+
+git status --short --branch
+git diff -- . ":(exclude)*.zip" ":(exclude)*.exe" ":(exclude)*.dmp"
+
+Review the diff for secrets and private data. Redact machine-specific details from reports before adding them.
+
+Commit and push:
+
+git pull --ff-only
+git add README.md ANTIGRAVITY_PROMPT.md *.ps1
+if (Test-Path .\docs) { git add .\docs }
+if (Test-Path .\reports) { git add .\reports }
+git status --short
+git commit -m "Update NVIDIA repair notes and artifacts"
+git push origin main
+
+If direct push to main is rejected, create a branch and push it:
+
+git checkout -b antigravity-update-YYYYMMDD-HHMMSS
+git push -u origin antigravity-update-YYYYMMDD-HHMMSS
+
+If authentication is missing, ask only for the minimum GitHub authentication needed to push. If the user does not provide it, write a local patch and clear instructions:
+
+git diff > C:\NvidiaFix\github-update.patch
+git status --short
+
+Then include the patch path and exact push commands in the final report.
 
 Emergency recovery:
 If Windows keeps booting into Safe Mode, run:
