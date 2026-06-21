@@ -13,7 +13,7 @@ This repo is designed for assisted troubleshooting with Codex, Gemini Antigravit
   Step-by-step NVIDIA cleanup helper. It can prepare DDU, enable Safe Mode, run DDU, install a manually selected NVIDIA driver, and clean up state.
 
 - `ANTIGRAVITY_PROMPT.md`
-  A professional English prompt for another agent to download this repo, inspect crash evidence, and run the safe fix flow.
+  A professional autonomous English prompt for another agent to download this repo, inspect crash evidence, repair when appropriate, and verify the result.
 
 ## Safety Notes
 
