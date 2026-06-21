@@ -206,6 +206,9 @@ https://github.com/nhatlinh0610/nvidia-driver-fix-toolkit
 Publishing requirement:
 Direct publishing to GitHub requires a GitHub account, token, or browser session with write access to the repository. Reading and downloading the public repository does not require an account. If write access is not available, do not block the repair workflow; leave a sanitized patch or ZIP bundle for the user to publish later.
 
+Email fallback:
+Email is acceptable only for sanitized publishable artifacts, not raw crash evidence. If GitHub publishing is not available, you may prepare an email with the sanitized ZIP bundle attached, but only send it after the user provides or confirms the recipient address and explicitly confirms the send action. Do not store email passwords, do not create mail rules, and do not send raw dumps, raw logs, tokens, usernames, serial numbers, IP addresses, or private machine-specific data.
+
 What to publish:
 - Script fixes and improvements.
 - Documentation updates.
@@ -251,7 +254,16 @@ If Git is not installed or the toolkit was downloaded as a ZIP:
   Compress-Archive -Path C:\NvidiaFix\Publish\* -DestinationPath C:\NvidiaFix\github-update.zip -Force
 - If there are edits inside the toolkit folder but no git metadata, write a simple change summary to C:\NvidiaFix\github-update-summary.md and include the changed files in C:\NvidiaFix\Publish.
 - If GitHub authentication and a safe API/file-upload path are already available, publish the sanitized files through GitHub without storing tokens.
-- If direct publishing is not available, ask only for the minimum GitHub authentication or permission needed to install Git from the official Git for Windows source. If the user does not provide it, leave the bundle and instructions in the final report.
+- If direct publishing is not available, ask only for the minimum GitHub authentication, permission needed to install Git from the official Git for Windows source, or a confirmed email recipient for the sanitized bundle. If the user does not provide any of these, leave the bundle and instructions in the final report.
+
+If the user wants email delivery:
+- Confirm the exact recipient address and that C:\NvidiaFix\github-update.zip is safe to send.
+- Use an already available mail client or browser mail session only if it does not require storing credentials.
+- Attach only C:\NvidiaFix\github-update.zip and, if useful, C:\NvidiaFix\github-update-summary.md.
+- Use a clear subject such as: NVIDIA toolkit sanitized update bundle.
+- Keep the message body brief and factual.
+- Stop before sending and ask for final confirmation if the email client/browser is about to transmit the attachment.
+- If sending fails or no mail session is available, do not keep trying risky workarounds. Leave the ZIP path and summary path in the final report.
 
 If Git is installed but authentication is missing, ask only for the minimum GitHub authentication needed to push. If the user does not provide it, write a local patch and clear instructions:
 
